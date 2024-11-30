@@ -1,0 +1,162 @@
+﻿@page "/clientes"
+@rendermode InteractiveServer
+
+<h3>Clientes</h3>
+
+
+<!-- Formulario para crear/editar cliente -->
+@if (ShowForm){
+    <div>
+        <h4>@(ClienteSeleccionado.Id == 0 ? "Crear Cliente" : "Editar Cliente")</h4>
+        <EditForm Model="ClienteSeleccionado" OnValidSubmit="GuardarCliente">
+            <DataAnnotationsValidator />
+            <ValidationSummary />
+
+            <div class="mb-3">
+                <label for="nombre" class="form-label">Nombre</label>
+                <input id="nombre" class="form-control" @bind="ClienteSeleccionado.Nombre" />
+            </div>
+            <div class="mb-3">
+                <label for="apellido" class="form-label">Apellido</label>
+                <input id="apellido" class="form-control" @bind="ClienteSeleccionado.Apellido" />
+            </div>
+            <div class="mb-3">
+                <label for="telefono" class="form-label">Teléfono</label>
+                <input id="telefono" type="tel" class="form-control" @bind="ClienteSeleccionado.Telefono" />
+            </div>
+
+            <button type="submit" class="btn btn-success">Guardar</button>
+            <button type="button" class="btn btn-secondary" @onclick="CancelarEdicion">Cancelar</button>
+        </EditForm>
+    </div>
+}
+else {
+
+    <!-- Buscador -->
+    <div class="mb-3">
+        <div class="input-group has-validation">
+            <div class="form-floating is-invalid w-75">
+                <input id="filtro" class="form-control" @bind="Filtro" placeholder="Ingrese un nombre o apellido..." />
+                <label for="filtro" class="form-label">Buscar:</label>
+            </div>
+
+            <div class="input-group-text w-25">
+                <div class="btn-group">
+                    <span @onclick="BuscarClientes" class="btn btn-info">Buscar</span>
+                    <span @onclick="LimpiarFiltro" class="btn btn-secondary">Limpiar</span>
+                    <span @onclick="()=>{ShowForm = true;}" class="btn btn-success">+</span>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Tabla de clientes -->
+    <table class="table table-striped">
+        <thead>
+            <tr>
+                <th>Código</th>
+                <th>Nombre</th>
+                <th>Apellido</th>
+                <th>Teléfono</th>
+                <th>Acciones</th>
+            </tr>
+        </thead>
+        <tbody>
+            @if (Clientes == null || !Clientes.Any())
+            {
+                <tr>
+                    <td colspan="5" class="text-center">No hay clientes registrados.</td>
+                </tr>
+            }
+            else
+            {
+                @foreach (var cliente in Clientes)
+                {
+                    <tr>
+                        <td>@cliente.Id</td>
+                        <td>@cliente.Nombre</td>
+                        <td>@cliente.Apellido</td>
+                        <td>@cliente.Telefono</td>
+                        <td>
+                            <button class="btn btn-primary btn-sm" @onclick="() => EditarCliente(cliente)">Editar</button>
+                            <button class="btn btn-danger btn-sm" @onclick="() => EliminarCliente(cliente.Id)">Eliminar</button>
+                        </td>
+                    </tr>
+                }
+            }
+        </tbody>
+    </table>
+}
+
+@code {
+    // Propiedades
+    private string Filtro { get; set; } = string.Empty;
+    private List<ClienteDto> Clientes { get; set; } = new();
+    private ClienteRequestDto ClienteSeleccionado { get; set; } = new();
+
+    public bool ShowForm { get; set; } = false;
+
+    // Cargar la lista inicial de clientes
+    protected override async Task OnInitializedAsync()
+    {
+        await BuscarClientes();
+    }
+
+    // Métodos CRUD
+    private async Task BuscarClientes()
+    {
+        Clientes = await ClienteBussines.Consultar(Filtro);
+        StateHasChanged();
+    }
+
+    private void EditarCliente(ClienteDto cliente)
+    {
+        ClienteSeleccionado = new ClienteRequestDto
+            {
+                Id = cliente.Id,
+                Nombre = cliente.Nombre,
+                Apellido = cliente.Apellido,
+                Telefono = cliente.Telefono
+            };
+
+        ShowForm = true;
+    }
+
+    private async Task GuardarCliente()
+    {
+        if (ClienteSeleccionado.Id == 0)
+        {
+            await ClienteBussines.Crear(ClienteSeleccionado);
+            StateHasChanged();
+        }
+        else
+        {
+            await ClienteBussines.Update(ClienteSeleccionado);
+            StateHasChanged();
+        }
+
+        await BuscarClientes();
+        CancelarEdicion();
+    }
+
+    private async Task EliminarCliente(int id)
+    {
+        var result = await ClienteBussines.Eliminar(id);
+        if (result){
+            await BuscarClientes();
+        }
+    }
+
+    private void CancelarEdicion()
+    {
+        ClienteSeleccionado = new ClienteRequestDto();
+        StateHasChanged();
+        ShowForm = false;
+    }
+
+    private async Task LimpiarFiltro()
+    {
+        Filtro = string.Empty;
+        await BuscarClientes();
+    }
+}
