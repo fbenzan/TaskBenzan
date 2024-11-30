@@ -86,7 +86,7 @@ Para contribuir al proyecto:
 5. Abra un Pull Request
 
 ## Licencia
-Este proyecto está bajo la licencia [Especificar tipo de licencia]
+Este proyecto no está bajo licencia de propiedad intelectual.
 
 ## Contacto
 Felix Ramon Benzan Castro
