@@ -48,7 +48,7 @@ dotnet ef migrations add AccionQueEstaHaciendo --context ApplicationDbContext --
 ### 3. Pasos de Instalación General
 1. Clone el repositorio:
 ```bash
-git clone [URL_del_repositorio]
+git clone [[URL_del_repositorio](https://github.com/fbenzan/TaskBenzan.git)]
 ```
 
 2. Restaure las dependencias:
@@ -86,7 +86,7 @@ Para contribuir al proyecto:
 5. Abra un Pull Request
 
 ## Licencia
-Este proyecto está bajo la licencia [Especificar tipo de licencia]
+Este proyecto no está bajo licencia de propiedad intelectual.
 
 ## Contacto
-[Nombre del Desarrollador/Equipo] - [correo electrónico]
+Felix Ramon Benzan Castro
